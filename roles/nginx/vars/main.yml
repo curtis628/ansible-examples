@@ -1,0 +1,4 @@
+---
+domain: static_site
+MyMessage: "Welcome to Ansible world!"
+ansible_become_pass: "{{ sudo_password }}"

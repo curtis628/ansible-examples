@@ -1,0 +1,10 @@
+---
+- hosts: all
+  connection: ssh
+  become: yes
+  become_user: root
+  gather_facts: yes
+  vars_files:
+    - /etc/ansible/sudo_password.yml
+  roles:
+    - nginx

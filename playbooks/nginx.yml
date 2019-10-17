@@ -1,0 +1,49 @@
+---
+- name: Install NGINX
+  hosts: all
+  connection: ssh
+  become: yes
+  become_user: root
+  gather_facts: yes
+  vars_files:
+    - /etc/ansible/sudo_password.yml
+  vars:
+    - ansible_become_pass: '{{ sudo_password }}'
+    - MyMessage: "Welcome to Ansible world!"
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+      notify:
+       - Restart Nginx
+    - name: copy the nginx config file
+      copy:
+        src: /root/playbooks/static_site.cfg
+        dest: /etc/nginx/sites-available/static_site.cfg
+    - name: create symlink
+      file:
+        src: /etc/nginx/sites-available/static_site.cfg
+        dest: /etc/nginx/sites-enabled/default
+        state: link
+      notify:
+       - Restart Nginx
+    - name: copy the content of the web site
+      copy:
+        src: /root/playbooks/static-site-src/
+        dest: /home/fritz/static-site
+      notify:
+       - Restart Nginx
+    - name: configure templated index page
+      template:
+        src: /root/playbooks/static-site-src/index.html.j2
+        dest: /home/fritz/static-site/index.html
+      notify:
+       - Restart Nginx
+  handlers:
+   - name: Restart Nginx
+     service:
+       name: nginx
+       state: restarted
+
